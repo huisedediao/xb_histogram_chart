@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:xb_custom_widget_cabin/histogram_chart/xb_histogram_chart/xb_histogram_chart_item.dart';
-import 'package:xb_custom_widget_cabin/histogram_chart/xb_histogram_chart/xb_histogram_chart_y_model.dart';
+
+import 'xb_histogram_chart_item.dart';
+import 'xb_histogram_chart_y_model.dart';
 
 // ignore: must_be_immutable
 class XBHistogram extends StatelessWidget {
