@@ -251,9 +251,8 @@ class XBHistogram extends StatelessWidget {
     );
     textPainter.layout();
 
-    final size = textPainter.size; // 这将返回一个Size对象，包含了文字的宽度和高度
-    final width = size.width; // 文字的宽度
-    // final height = size.height; // 文字的高度
+    final size = textPainter.size;
+    final width = size.width;
     return width + 2;
   }
 }
