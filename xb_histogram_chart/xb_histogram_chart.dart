@@ -17,17 +17,20 @@ class XBHistogram extends StatelessWidget {
   /// 柱子的间距
   final double itemGap;
 
-  /// 左侧文字的最大宽度
-  final double maxLeftTitleWidth;
+  /// 左侧文字的宽度
+  final double leftTitleWidth;
+
+  /// 底部文字的最大宽度，默认100
+  final double maxBottomTitleWidth;
+
+  /// 左侧文字和图表的距离
+  final double leftTitlePaddingRight;
 
   /// 底部文字，会自动生成
   late List<String> xAxisTitlesList;
 
   /// 根据yModels中所有元素的value计算的最大值，用来计算柱子百分比
   late double maxValue;
-
-  /// 左侧文字的宽度，会自动计算，最宽为maxTitleWidth
-  late double leftTitleWidth;
 
   /// 底部文字的宽度，会自动计算
   late double bottomTitleWidth;
@@ -37,13 +40,14 @@ class XBHistogram extends StatelessWidget {
       this.xAxisTitleCount = 4,
       this.itemHeigth = 18,
       this.itemGap = 15,
-      this.maxLeftTitleWidth = 70,
+      this.leftTitlePaddingRight = 10,
+      this.leftTitleWidth = 50,
+      this.maxBottomTitleWidth = 100,
       super.key}) {
     if (yModels.isEmpty) {
       yModels.add(XBHistogramYModel(name: "暂无数据", value: 0));
     }
     xAxisTitlesList = caculateXAxisTitlesList();
-    leftTitleWidth = caculateMaxLeftTitleWidth();
     bottomTitleWidth = caculateMaxBottomTitleWidth();
   }
 
@@ -51,7 +55,52 @@ class XBHistogram extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [_top(), _bottom()],
+      children: [
+        Stack(children: [_topUnder(), _top()]),
+        _bottom()
+      ],
+    );
+  }
+
+  double get _bottomLeading =>
+      leftTitleWidth + leftTitlePaddingRight - bottomTitleWidth * 0.5;
+
+  _topUnder() {
+    return Padding(
+      padding: EdgeInsets.only(left: _bottomLeading),
+      child: Container(
+        // color: Colors.blue,
+        child: FractionallySizedBox(
+          widthFactor: 1.0,
+          child: Container(
+            // color: Colors.amber,
+            alignment: Alignment.topLeft,
+            height: _topTotalHeight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(xAxisTitlesList.length, (index) {
+                return Visibility(
+                  maintainAnimation: true,
+                  maintainSize: true,
+                  maintainState: true,
+                  // visible: true,
+                  visible: index != 0,
+                  child: Container(
+                    // color: Colors.purple,
+                    width: bottomTitleWidth,
+                    height: _topTotalHeight,
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 1,
+                      color: Colors.grey.withAlpha(30),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -68,28 +117,29 @@ class XBHistogram extends StatelessWidget {
     return itemHeigth - 5;
   }
 
-  double get _paddingRight => 16;
-
   Widget _topLeft() {
-    return Column(
-      children: List.generate(yModels.length, (index) {
-        XBHistogramYModel yModel = yModels[index];
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: (index == yModels.length - 1) ? 0 : itemGap,
-              right: _paddingRight - bottomTitleWidth * 0.5),
-          child: Container(
-              // color: Colors.orange,
-              width: leftTitleWidth,
-              alignment: Alignment.centerRight,
-              height: itemHeigth,
-              child: Text(
-                yModel.name,
-                overflow: TextOverflow.ellipsis,
-                style: _leftTitleStyle,
-              )),
-        );
-      }),
+    return Container(
+      // color: Colors.red,
+      child: Column(
+        children: List.generate(yModels.length, (index) {
+          XBHistogramYModel yModel = yModels[index];
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: (index == yModels.length - 1) ? 0 : itemGap,
+                right: leftTitlePaddingRight),
+            child: Container(
+                // color: Colors.orange,
+                width: leftTitleWidth,
+                alignment: Alignment.centerRight,
+                height: itemHeigth,
+                child: Text(
+                  yModel.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: _leftTitleStyle,
+                )),
+          );
+        }),
+      ),
     );
   }
 
@@ -103,68 +153,34 @@ class XBHistogram extends StatelessWidget {
   }
 
   Widget _topRight() {
-    return Stack(
-      children: [
-        FractionallySizedBox(
-          widthFactor: 1.0,
-          child: Container(
-            // color: Colors.amber,
-            alignment: Alignment.topLeft,
-            height: _topTotalHeight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(xAxisTitlesList.length, (index) {
-                return Visibility(
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  maintainState: true,
-                  visible: index != 0,
-                  child: Container(
-                    // color: Colors.red,
-                    width: bottomTitleWidth,
-                    height: _topTotalHeight,
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 1,
-                      color: Colors.grey.withAlpha(30),
-                    ),
-                  ),
-                );
-              }),
-            ),
+    return Container(
+        // color: Colors.green,
+        child: Container(
+      decoration: BoxDecoration(
+        // color: Colors.orange,
+        border: Border(
+          left: BorderSide(
+            color: Colors.grey.withAlpha(80), // 边框颜色
+            width: 1.0, // 边框宽度
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: bottomTitleWidth * 0.5),
-          child: Container(
-            decoration: BoxDecoration(
-              // color: Colors.orange,
-              border: Border(
-                left: BorderSide(
-                  color: Colors.grey.withAlpha(80), // 边框颜色
-                  width: 1.0, // 边框宽度
-                ),
-              ),
+      ),
+      // color: Colors.orange,
+      child: Column(
+        children: List.generate(yModels.length, (index) {
+          XBHistogramYModel yModel = yModels[index];
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: (index == yModels.length - 1) ? 0 : itemGap),
+            child: Padding(
+              padding: EdgeInsets.only(right: bottomTitleWidth * 0.5),
+              child: XBHistogramItem(
+                  value: yModel.value / maxValue, height: itemHeigth),
             ),
-            // color: Colors.orange,
-            child: Column(
-              children: List.generate(yModels.length, (index) {
-                XBHistogramYModel yModel = yModels[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                      bottom: (index == yModels.length - 1) ? 0 : itemGap),
-                  child: Padding(
-                    padding: EdgeInsets.only(right: bottomTitleWidth * 0.5),
-                    child: XBHistogramItem(
-                        value: yModel.value / maxValue, height: itemHeigth),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-      ],
-    );
+          );
+        }),
+      ),
+    ));
   }
 
   _bottom() {
@@ -174,13 +190,14 @@ class XBHistogram extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: leftTitleWidth + _paddingRight - bottomTitleWidth * 0.5,
+            width: _bottomLeading,
           ),
           Expanded(
               child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(xAxisTitlesList.length, (index) {
               return Container(
+                // color: Colors.amber,
                 width: bottomTitleWidth,
                 alignment: Alignment.center,
                 child: Text(
@@ -216,17 +233,6 @@ class XBHistogram extends StatelessWidget {
     return ret;
   }
 
-  double caculateMaxLeftTitleWidth() {
-    double max = 0;
-    for (var element in yModels) {
-      final tempW = caculateTitleWidth(element.name, _leftTitleStyle);
-      if (tempW > max) {
-        max = tempW;
-      }
-    }
-    return min(max, maxLeftTitleWidth);
-  }
-
   double caculateMaxBottomTitleWidth() {
     double max = 0;
     for (var element in xAxisTitlesList) {
@@ -235,7 +241,7 @@ class XBHistogram extends StatelessWidget {
         max = tempW;
       }
     }
-    return min(max, maxLeftTitleWidth);
+    return min(max, maxBottomTitleWidth);
   }
 
   double caculateTitleWidth(String value, TextStyle style) {
